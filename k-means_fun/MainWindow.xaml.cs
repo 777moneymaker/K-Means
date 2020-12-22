@@ -13,13 +13,13 @@ namespace k_means_fun {
     public partial class MainWindow : Window {
 
         public HashSet<Point> Points { get; set; }
-        public HashSet<Cluster> Clusters { get; set; }
+        public List<Cluster> Clusters { get; set; }
 
 
         public MainWindow() {
             InitializeComponent();
             Points = new HashSet<Point>();
-            Clusters = new HashSet<Cluster>();
+            Clusters = new List<Cluster>();
         }
 
         private void FileLoadButton_Click(object sender, RoutedEventArgs e) {
@@ -59,24 +59,48 @@ namespace k_means_fun {
 
             Clusters.Clear();
             Points = (HashSet<Point>)Points.Shuffle();
-            Points.ToList().ForEach(p => p.InCluster = false);
+
 
             foreach(var point in Points.GetRandomElements(n_clusters)) {
                 Cluster cluster = new Cluster();
-                
-                point.InCluster = true;
                 cluster.Points.Add(point);
-                
+                cluster.RearrangeCentroid();
                 Clusters.Add(cluster);
             }
-
             foreach(var p in Points) {
-                if(!p.InCluster) {
+                if(!Clusters.Any(c => c.Points.Contains(p))) {
                     Cluster closest = Clusters.OrderBy(cluster => cluster.GetDistanceToCentroid(p)).First();
                     closest.Points.Add(p);
-                    p.InCluster = true;
                 }
             }
+            foreach(var cluster in Clusters)
+                cluster.RearrangeCentroid();
+
+            List<Cluster> prevClusters;
+            int k = 0;
+            do {
+                prevClusters = new List<Cluster>(Clusters.Select(c => ((ICloneable)c).Clone() as Cluster));
+                //Clusters.ForEach(c => {
+                //    c.Points.ToList().ForEach(p => {
+                //        if(!p.ClusterSeed)
+                //            c.Points.Remove(p);
+                //    });
+                //    c.RearrangeCentroid();
+                //});
+                Clusters.ForEach(c => c.Points.Clear());
+                foreach(var p in Points) {
+                    Cluster closest = Clusters.OrderBy(cluster => cluster.GetDistanceToCentroid(p)).First();
+                    //Clusters.ForEach(c => {
+                    //    if(c.Points.Contains(p))
+                    //        c.Points.Remove(p);
+                    //});
+                    closest.Points.Add(p);
+                }
+                Clusters.ForEach(c => c.RearrangeCentroid());
+                k++;
+            } while(!Clusters.SequenceEqual(prevClusters));
+
+            MessageBox.Show(k.ToString());
 
             StringBuilder builder = new StringBuilder();
             int i = 0;
@@ -89,7 +113,7 @@ namespace k_means_fun {
             }
             OutputTextBox.Text = builder.ToString();
 
-            ScatterWindow scatterWindow = new ScatterWindow(Clusters);
+            ScatterWindow scatterWindow = new ScatterWindow(Clusters.ToHashSet());
             scatterWindow.Show();
         }
     }
