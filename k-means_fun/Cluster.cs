@@ -1,13 +1,9 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Media;
 
 namespace k_means_fun {
-    public class Cluster : Point {
+    public class Cluster {
 
         public Point Centroid { get; set; }
         public ObservableCollection<Point> Points { get; set; }
