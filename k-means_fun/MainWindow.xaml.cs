@@ -62,10 +62,11 @@ namespace k_means_fun {
             Points.ToList().ForEach(p => p.InCluster = false);
 
             foreach(var point in Points.GetRandomElements(n_clusters)) {
-                point.InCluster = true;
-
                 Cluster cluster = new Cluster();
+                
+                point.InCluster = true;
                 cluster.Points.Add(point);
+                
                 Clusters.Add(cluster);
             }
 
