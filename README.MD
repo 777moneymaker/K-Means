@@ -1,7 +1,9 @@
 ﻿# K-means
 
 ## Usage
-Load file from data directory. Then click write number of clusters to find -> "Compute"
+Load file from data directory. Then write number of clusters to find -> click "Compute".
+
+## What is K-means
 K-means is an algorithm used in points clustering on 2D plane.
 
 ### Author
