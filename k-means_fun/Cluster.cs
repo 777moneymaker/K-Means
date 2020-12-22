@@ -33,7 +33,6 @@ namespace k_means_fun {
             double yDelta = Centroid.Y - p.Y;
 
             return Math.Sqrt(Math.Pow(xDelta, 2) + Math.Pow(yDelta, 2));
-
         }
     }
 }

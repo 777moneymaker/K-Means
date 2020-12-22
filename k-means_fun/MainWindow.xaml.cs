@@ -28,17 +28,18 @@ namespace k_means_fun {
 
             if(ofd.FileName != null) {
                 FileLable.Content = ofd.FileName;
-                    StreamReader sr = new StreamReader(ofd.FileName);
-                    var lines = new List<string[]>();
+                StreamReader sr = new StreamReader(ofd.FileName);
+                var lines = new List<string[]>();
                     // sr.ReadLine();
-                    while(!sr.EndOfStream) {
-                        string[] Line = sr.ReadLine().Split(',');
-                        lines.Add(Line);
-                    }
-                    var points = lines.ToArray();
-                    foreach(var line in points)
-                        if(double.TryParse(line[0].Replace(".", ","), out double x) && double.TryParse(line[1].Replace(".", ","), out double y))
-                            Points.Add(new Point(x, y));
+                while(!sr.EndOfStream) {
+                    string[] Line = sr.ReadLine().Split(',');
+                    lines.Add(Line);
+                }
+                var points = lines.ToArray();
+                Points.Clear();
+                foreach(var line in points)
+                    if(double.TryParse(line[0].Replace(".", ","), out double x) && double.TryParse(line[1].Replace(".", ","), out double y))
+                        Points.Add(new Point(x, y));
             }
         }
 
@@ -58,6 +59,7 @@ namespace k_means_fun {
 
             Clusters.Clear();
             Points = (HashSet<Point>)Points.Shuffle();
+            Points.ToList().ForEach(p => p.InCluster = false);
 
             foreach(var point in Points.GetRandomElements(n_clusters)) {
                 point.InCluster = true;
@@ -71,6 +73,7 @@ namespace k_means_fun {
                 if(!p.InCluster) {
                     Cluster closest = Clusters.OrderBy(cluster => cluster.GetDistanceToCentroid(p)).First();
                     closest.Points.Add(p);
+                    p.InCluster = true;
                 }
             }
 
@@ -80,7 +83,7 @@ namespace k_means_fun {
                 builder.AppendLine($"===== Cluster {++i} =====");
                 int j = 0;
                 foreach(var point in cluster.Points)
-                    builder.AppendLine($"Point {++j}: X -> {point.X}, Y -> {point.Y}");
+                    builder.AppendLine($"Point {++j}: {point}");
                 builder.AppendLine();
             }
             OutputTextBox.Text = builder.ToString();
