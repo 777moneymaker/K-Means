@@ -1,6 +1,7 @@
 ﻿using Microsoft.Win32;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -26,20 +27,22 @@ namespace k_means_fun {
             OpenFileDialog ofd = new OpenFileDialog { Filter = "*.csv;*.txt|*.csv;*.txt", FilterIndex = 1};
             ofd.ShowDialog();
 
-            if(ofd.FileName != null) {
+            if(ofd.FileName != string.Empty) {
                 FileLable.Content = ofd.FileName;
-                StreamReader sr = new StreamReader(ofd.FileName);
-                var lines = new List<string[]>();
+
+                using(StreamReader sr = new StreamReader(ofd.FileName)) {
+                    var lines = new List<string[]>();
                     // sr.ReadLine();
-                while(!sr.EndOfStream) {
-                    string[] Line = sr.ReadLine().Split(',');
-                    lines.Add(Line);
+                    while(!sr.EndOfStream) {
+                        string[] Line = sr.ReadLine().Split(',');
+                        lines.Add(Line);
+                    }
+                    var points = lines.ToArray();
+                    Points.Clear();
+                    foreach(var line in points)
+                        if(double.TryParse(line[0].Replace(".", ","), out double x) && double.TryParse(line[1].Replace(".", ","), out double y))
+                            Points.Add(new Point(x, y));
                 }
-                var points = lines.ToArray();
-                Points.Clear();
-                foreach(var line in points)
-                    if(double.TryParse(line[0].Replace(".", ","), out double x) && double.TryParse(line[1].Replace(".", ","), out double y))
-                        Points.Add(new Point(x, y));
             }
         }
 
@@ -78,6 +81,8 @@ namespace k_means_fun {
 
             List<Cluster> prevClusters;
             int k = 0;
+            Stopwatch sw = new Stopwatch();
+            sw.Start();
             do {
                 prevClusters = new List<Cluster>(Clusters.Select(c => ((ICloneable)c).Clone() as Cluster));
                 //Clusters.ForEach(c => {
@@ -99,8 +104,8 @@ namespace k_means_fun {
                 Clusters.ForEach(c => c.RearrangeCentroid());
                 k++;
             } while(!Clusters.SequenceEqual(prevClusters));
-
-            MessageBox.Show(k.ToString());
+            sw.Stop();
+            MessageBox.Show($"Iterations: {k}. Time: {sw.ElapsedMilliseconds:0.00}[ms]");
 
             StringBuilder builder = new StringBuilder();
             int i = 0;
