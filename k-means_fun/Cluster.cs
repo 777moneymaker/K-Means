@@ -1,21 +1,19 @@
 ﻿using System;
-using System.Collections.ObjectModel;
+using System.Collections.Generic;
 using System.Linq;
 
 namespace k_means_fun {
-    public class Cluster {
+    public class Cluster : IEquatable<Cluster>, ICloneable {
 
-        public Point Centroid { get; set; }
-        public ObservableCollection<Point> Points { get; set; }
+        public Point Centroid { get; set; } = new Point { X = 0, Y = 0 };
+        public List<Point> Points { get; set; } = new List<Point>();
 
-        public Cluster() {
-            Points = new ObservableCollection<Point>();
-            Centroid = new Point { X = 0, Y = 0 };
-            
-            Points.CollectionChanged += Points_CollectionChanged;
+        public Cluster() { 
+            //Points.CollectionChanged += Points_CollectionChanged;
         }
 
-        private void Points_CollectionChanged(object sender, System.Collections.Specialized.NotifyCollectionChangedEventArgs e) {
+
+        public void RearrangeCentroid() {
             double x_sum = Points.Sum(p => p.X);
             double y_sum = Points.Sum(p => p.Y);
 
@@ -33,6 +31,16 @@ namespace k_means_fun {
             double yDelta = Centroid.Y - p.Y;
 
             return Math.Sqrt(Math.Pow(xDelta, 2) + Math.Pow(yDelta, 2));
+        }
+
+        bool IEquatable<Cluster>.Equals(Cluster other) {
+            return this.Points.SequenceEqual(other.Points);
+        }
+        object ICloneable.Clone() {
+            return new Cluster() {
+                Centroid = Centroid.Clone() as Point,
+                Points = new List<Point>(Points.Select(p => p.Clone() as Point))
+            };
         }
     }
 }
